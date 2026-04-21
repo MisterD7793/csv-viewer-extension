@@ -1,49 +1,61 @@
 # CSV Roster Viewer
 
-A Chrome extension that intercepts CSV downloads on allowed domains and opens them as a searchable, sortable table in a new tab — instead of downloading the file.
+Managing class rosters often means clicking an export button, waiting for a CSV file to download, finding it in your Downloads folder, and opening it in Excel — just to glance at a list of names. This extension eliminates those steps.
 
-Built for the Florence Melton School of Adult Jewish Learning to view class roster reports from their Events registration platform.
+CSV Roster Viewer is a Chrome extension built for the Florence Melton School of Adult Jewish Learning. When you export a report from Events, instead of downloading a file, the data opens instantly in your browser as a clean, interactive table you can search and sort. When you're done, just close the tab. No files pile up in your Downloads folder, and you never have to open Excel.
 
----
-
-## Features
-
-- **Automatic interception** — CSV downloads from allowed domains open as a table instead of downloading
-- **Searchable** — live filter across all columns
-- **Sortable** — click any column header to sort ascending/descending
-- **Download button** — still get the file if you need it
-- **Domain allowlist** — only intercepts CSVs from sites you choose; everything else downloads normally
-- **UTF-16 support** — correctly handles CSV files exported by Windows-based platforms (with or without BOM)
+The extension only intercepts CSV downloads from websites you specifically allow — everything else continues to download normally, exactly as before.
 
 ---
 
-## Installation (Developer Mode)
+## Installation
 
-1. Download and unzip the extension folder
-2. Go to `chrome://extensions`
-3. Enable **Developer mode** (top right)
-4. Click **Load unpacked** and select the unzipped folder
-5. Click the extension icon and choose **Manage allowed domains**
-6. Add your platform's domain (e.g. `app.example.com`)
+### Step 1 — Download the extension
+
+1. Go to: https://github.com/MisterD7793/csv-viewer-extension
+2. Click the green **Code** button, then click **Download ZIP**
+3. Find the ZIP file in your Downloads folder and double-click it to unzip it
+
+### Step 2 — Load it in Chrome
+
+1. Open Chrome and type `chrome://extensions` in the address bar, then press Enter
+2. In the top-right corner, turn on **Developer mode**
+3. Click **Load unpacked**
+4. Navigate to the unzipped folder, open the **csv-viewer-extension** subfolder inside it, and click **Select** (Mac) or **Select Folder** (PC)
+
+The extension will now appear in your list and is ready to configure.
+
+### Step 3 — Configure your allowed domains
+
+Before the extension will do anything, you need to tell it which websites it should watch for CSV downloads.
+
+1. Click the puzzle piece icon in Chrome's toolbar, then click **CSV Roster Viewer**
+2. Click **Open Settings**
+3. Type the domain of the site you want to enable (e.g., `events.org`) and click **Add**
+4. Repeat for any other sites
+
+> **Tip:** You only need the domain name — no `https://` or trailing slashes. Adding `events.org` also covers subdomains like `reports.events.org`.
 
 ---
 
-## Usage
+## Using the Extension
 
-1. Navigate to your platform and trigger a CSV export
-2. Instead of downloading, the file opens in a new tab as a table
-3. Use the search box to filter rows
-4. Click column headers to sort
-5. Click **Download CSV** if you want the original file
+Once a domain is configured, just use that website normally. When you click a link or button that would normally download a CSV file, the extension will automatically open it as an interactive table in a new browser tab instead.
+
+From the table view you can:
+
+- **Search** — type in the search box to filter rows in real time
+- **Sort** — click any column header to sort by that column
+- **Download** — click the Download button to save the original CSV file if needed
 
 ---
 
 ## Domain Matching
 
-Adding `foo.com` to the allowlist automatically covers all subdomains:
-- `foo.com` ✓
-- `app.foo.com` ✓
-- `admin.foo.com` ✓
+Adding `events.org` to the allowlist automatically covers all subdomains:
+- `events.org` ✓
+- `app.events.org` ✓
+- `admin.events.org` ✓
 
 No wildcard syntax needed.
 
@@ -51,8 +63,7 @@ No wildcard syntax needed.
 
 ## Development
 
-See `CHANGELOG.md` for version history and `HISTORY.md` for a full narrative
-of the development process, including every approach tried and why.
+See `CHANGELOG.md` for version history and `HISTORY.md` for a full narrative of the development process, including every approach tried and why.
 
 ---
 
