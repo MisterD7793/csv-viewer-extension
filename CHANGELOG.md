@@ -1,6 +1,10 @@
 # CSV Roster Viewer — Changelog
 
-## v2.1 (current)
+## v2.2 (current)
+- Published to GitHub for distribution
+- Added complete user documentation: installation, usage, Developer Mode explainer, uninstallation
+
+## v2.1
 - Added icon at 16px, 48px, and 128px
 - Icon design: browser window with bold CSV overlay on dark theme
 

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "CSV Roster Viewer",
-  "version": "2.1",
+  "version": "2.2",
   "description": "Intercepts CSV downloads on allowed domains and opens them as a viewable table.",
   "permissions": [
     "contextMenus",
