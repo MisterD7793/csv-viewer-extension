@@ -25,6 +25,14 @@ The extension only intercepts CSV downloads from websites you specifically allow
 
 The extension will now appear in your list and is ready to configure.
 
+> **About Developer Mode:** Developer mode allows Chrome to load extensions that haven't been submitted to the Chrome Web Store. It is a standard feature built into Chrome and is widely used by developers and organizations distributing internal tools. There are a few things to be aware of:
+>
+> - **Startup warning:** Each time you launch Chrome with Developer mode on, a yellow banner may appear warning that you're running unpacked extensions. You can dismiss it by clicking the X — it doesn't affect anything.
+> - **No automatic updates:** Unlike Web Store extensions, this one won't update itself. To get a newer version, you'd download it again and repeat the installation steps.
+> - **Trust:** Because Developer mode bypasses Google's extension review process, you should only load extensions from sources you trust. This extension's full source code is available at the GitHub link above for anyone to inspect.
+>
+> Developer mode does not weaken Chrome's security in any other way, and you can turn it off at any time — though doing so will disable any unpacked extensions you've loaded.
+
 ### Step 3 — Configure your allowed domains
 
 Before the extension will do anything, you need to tell it which websites it should watch for CSV downloads.
@@ -58,6 +66,16 @@ Adding `events.org` to the allowlist automatically covers all subdomains:
 - `admin.events.org` ✓
 
 No wildcard syntax needed.
+
+---
+
+## Uninstalling
+
+1. Open Chrome and go to `chrome://extensions`
+2. Find **CSV Roster Viewer** and click **Remove**
+3. If you no longer need Developer mode, toggle it off in the top-right corner of that same page
+
+You can also delete the unzipped extension folder from your computer — the extension stores your domain settings in Chrome, so they'll be removed automatically when you uninstall.
 
 ---
 
