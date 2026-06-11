@@ -199,13 +199,38 @@
     .copy-col-btn:hover { color: var(--text); }
     .copy-col-btn.copied { color: var(--accent) !important; opacity: 1; }
 
-    .copy-row-th { width: 32px; padding: 0; }
-
-    .copy-row-cell {
-      width: 32px;
-      padding: 0 6px;
+    .row-num-th {
+      width: 76px;
+      min-width: 76px;
+      padding: 10px 8px;
       text-align: center;
+      cursor: default;
+      border-right: 1px solid var(--border);
+    }
+    .row-num-th:hover { color: var(--text-muted); }
+
+    .row-num-cell {
+      width: 76px;
+      min-width: 76px;
+      padding: 0 8px;
       vertical-align: middle;
+      border-right: 1px solid var(--border);
+    }
+
+    .row-num-inner {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      justify-content: flex-start;
+    }
+
+    .row-num-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      flex: 1;
+      text-align: right;
+      user-select: none;
     }
 
     .copy-row-btn {
@@ -220,10 +245,46 @@
       opacity: 0;
       transition: opacity 0.1s, color 0.15s;
       border-radius: 3px;
+      flex-shrink: 0;
     }
     tbody tr:hover .copy-row-btn { opacity: 1; }
     .copy-row-btn:hover { color: var(--text); }
     .copy-row-btn.copied { color: var(--accent) !important; opacity: 1; }
+
+    input[type="checkbox"].row-select,
+    input[type="checkbox"].col-select,
+    input[type="checkbox"].select-all-rows {
+      cursor: pointer;
+      accent-color: var(--accent);
+      width: 13px;
+      height: 13px;
+      flex-shrink: 0;
+      margin: 0;
+    }
+
+    tbody tr.row-selected { background: #172017; }
+    tbody tr.row-selected:hover { background: #1c2a1c; }
+
+    th.col-selected { background: #172017; color: var(--accent); }
+
+    #copy-selected-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-weight: 500;
+      padding: 6px 14px;
+      background: var(--accent-dim);
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s;
+    }
+    #copy-selected-btn:hover { background: #14532d; }
+    #copy-selected-btn.copied { background: #15803d; color: #fff; }
 
     #no-results {
       display: none;
@@ -247,6 +308,13 @@
     <input id="search" type="text" placeholder="Filter rows…" autocomplete="off" />
   </div>
   <span class="stat-pill" id="row-count">— rows</span>
+  <button id="copy-selected-btn" style="display:none">
+    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+    </svg>
+    <span>Copy Selected</span>
+  </button>
   <button id="download-btn">
     <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>

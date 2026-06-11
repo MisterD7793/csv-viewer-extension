@@ -32,10 +32,13 @@ const searchEl = document.getElementById('search');
 const rowCountEl = document.getElementById('row-count');
 const filenameEl = document.getElementById('filename');
 const downloadBtn = document.getElementById('download-btn');
+const copySelectedBtn = document.getElementById('copy-selected-btn');
 const noResults = document.getElementById('no-results');
 
 let allRows = [], headers = [], sortCol = -1, sortAsc = true;
 let rawCsvText = '', csvFilename = 'roster.csv';
+let selectedRows = new Set(), selectedCols = new Set();
+let selectAllCheckbox = null;
 
 downloadBtn.addEventListener('click', () => {
   if (!rawCsvText) return;
@@ -44,6 +47,18 @@ downloadBtn.addEventListener('click', () => {
   const a = document.createElement('a');
   a.href = url; a.download = csvFilename; a.click();
   URL.revokeObjectURL(url);
+});
+
+copySelectedBtn.addEventListener('click', () => {
+  const visibleRows = sortRows(filterRows(searchEl.value));
+  const rowsToCopy = selectedRows.size > 0
+    ? visibleRows.filter(r => selectedRows.has(r))
+    : visibleRows;
+  const colIndices = selectedCols.size > 0
+    ? [...selectedCols].sort((a, b) => a - b)
+    : headers.map((_, i) => i);
+  const text = rowsToCopy.map(row => colIndices.map(i => row[i] ?? '').join('\t')).join('\n');
+  copyAndFlash(text, copySelectedBtn);
 });
 
 function initWithData(csvText, fetchError, csvUrl, filename) {
@@ -88,30 +103,83 @@ function copyAndFlash(text, btn) {
   });
 }
 
+function updateSelectionUI() {
+  if (selectAllCheckbox) {
+    const visibleRows = sortRows(filterRows(searchEl.value));
+    const n = visibleRows.filter(r => selectedRows.has(r)).length;
+    selectAllCheckbox.indeterminate = n > 0 && n < visibleRows.length;
+    selectAllCheckbox.checked = n > 0 && n === visibleRows.length;
+  }
+  const hasRows = selectedRows.size > 0, hasCols = selectedCols.size > 0;
+  copySelectedBtn.style.display = (hasRows || hasCols) ? 'flex' : 'none';
+  if (hasRows || hasCols) {
+    const parts = [];
+    if (hasRows) parts.push(`${selectedRows.size} row${selectedRows.size !== 1 ? 's' : ''}`);
+    if (hasCols) parts.push(`${selectedCols.size} col${selectedCols.size !== 1 ? 's' : ''}`);
+    copySelectedBtn.querySelector('span').textContent = `Copy ${parts.join(' × ')}`;
+  }
+}
+
 function renderHeaders() {
   const tr = document.createElement('tr');
+
+  const rowNumTh = document.createElement('th');
+  rowNumTh.className = 'row-num-th';
+  selectAllCheckbox = document.createElement('input');
+  selectAllCheckbox.type = 'checkbox';
+  selectAllCheckbox.className = 'select-all-rows';
+  selectAllCheckbox.title = 'Select / deselect all visible rows';
+  selectAllCheckbox.addEventListener('change', () => {
+    const visibleRows = sortRows(filterRows(searchEl.value));
+    visibleRows.forEach(r => selectAllCheckbox.checked ? selectedRows.add(r) : selectedRows.delete(r));
+    renderRows(sortRows(filterRows(searchEl.value)), searchEl.value);
+  });
+  rowNumTh.appendChild(selectAllCheckbox);
+  tr.appendChild(rowNumTh);
+
   headers.forEach((h, i) => {
     const th = document.createElement('th');
-    th.innerHTML = `${escHtml(h)}<span class="sort-arrow"></span><button class="copy-col-btn" title="Copy column">${COPY_ICON}</button>`;
-    th.addEventListener('click', () => {
-      if (sortCol === i) sortAsc = !sortAsc;
-      else { sortCol = i; sortAsc = true; }
-      document.querySelectorAll('th').forEach(el => el.classList.remove('sorted-asc','sorted-desc'));
-      th.classList.add(sortAsc ? 'sorted-asc' : 'sorted-desc');
-      renderRows(sortRows(filterRows(searchEl.value)), searchEl.value);
+
+    const colCb = document.createElement('input');
+    colCb.type = 'checkbox';
+    colCb.className = 'col-select';
+    colCb.title = 'Select column';
+    colCb.checked = selectedCols.has(i);
+    colCb.addEventListener('click', e => e.stopPropagation());
+    colCb.addEventListener('change', () => {
+      if (colCb.checked) selectedCols.add(i); else selectedCols.delete(i);
+      th.classList.toggle('col-selected', colCb.checked);
+      updateSelectionUI();
     });
-    const copyBtn = th.querySelector('.copy-col-btn');
+    th.appendChild(colCb);
+
+    const label = document.createElement('span');
+    label.innerHTML = `${escHtml(h)}<span class="sort-arrow"></span>`;
+    th.appendChild(label);
+
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'copy-col-btn';
+    copyBtn.title = 'Copy column';
+    copyBtn.innerHTML = COPY_ICON;
     copyBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       const visibleRows = sortRows(filterRows(searchEl.value));
       const text = visibleRows.map(r => r[i] ?? '').join('\n');
       copyAndFlash(text, copyBtn);
     });
+    th.appendChild(copyBtn);
+
+    th.addEventListener('click', () => {
+      if (sortCol === i) sortAsc = !sortAsc;
+      else { sortCol = i; sortAsc = true; }
+      document.querySelectorAll('th').forEach(el => el.classList.remove('sorted-asc', 'sorted-desc'));
+      th.classList.add(sortAsc ? 'sorted-asc' : 'sorted-desc');
+      renderRows(sortRows(filterRows(searchEl.value)), searchEl.value);
+    });
+
     tr.appendChild(th);
   });
-  const spacerTh = document.createElement('th');
-  spacerTh.className = 'copy-row-th';
-  tr.appendChild(spacerTh);
+
   theadEl.appendChild(tr);
 }
 
@@ -146,8 +214,44 @@ function renderRows(rows, query = '') {
   rowCountEl.textContent = `${rows.length} row${rows.length !== 1 ? 's' : ''}`;
   noResults.style.display = rows.length === 0 ? 'block' : 'none';
   const frag = document.createDocumentFragment();
-  rows.forEach(row => {
+  rows.forEach((row, rowIdx) => {
     const tr = document.createElement('tr');
+    if (selectedRows.has(row)) tr.classList.add('row-selected');
+
+    const rowNumTd = document.createElement('td');
+    rowNumTd.className = 'row-num-cell';
+    const inner = document.createElement('div');
+    inner.className = 'row-num-inner';
+
+    const rowCb = document.createElement('input');
+    rowCb.type = 'checkbox';
+    rowCb.className = 'row-select';
+    rowCb.checked = selectedRows.has(row);
+    rowCb.addEventListener('change', () => {
+      if (rowCb.checked) { selectedRows.add(row); tr.classList.add('row-selected'); }
+      else { selectedRows.delete(row); tr.classList.remove('row-selected'); }
+      updateSelectionUI();
+    });
+
+    const numSpan = document.createElement('span');
+    numSpan.className = 'row-num-label';
+    numSpan.textContent = rowIdx + 1;
+
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'copy-row-btn';
+    copyBtn.title = 'Copy row';
+    copyBtn.innerHTML = COPY_ICON;
+    copyBtn.addEventListener('click', () => {
+      const text = headers.map((_, i) => row[i] ?? '').join('\t');
+      copyAndFlash(text, copyBtn);
+    });
+
+    inner.appendChild(rowCb);
+    inner.appendChild(numSpan);
+    inner.appendChild(copyBtn);
+    rowNumTd.appendChild(inner);
+    tr.appendChild(rowNumTd);
+
     headers.forEach((_, i) => {
       const td = document.createElement('td');
       const val = row[i] ?? '';
@@ -155,21 +259,14 @@ function renderRows(rows, query = '') {
       td.innerHTML = val ? highlight(val, query) : '—';
       tr.appendChild(td);
     });
-    const copyTd = document.createElement('td');
-    copyTd.className = 'copy-row-cell';
-    copyTd.innerHTML = `<button class="copy-row-btn" title="Copy row">${COPY_ICON}</button>`;
-    copyTd.querySelector('.copy-row-btn').addEventListener('click', () => {
-      const text = headers.map((_, i) => row[i] ?? '').join('\t');
-      copyAndFlash(text, copyTd.querySelector('.copy-row-btn'));
-    });
-    tr.appendChild(copyTd);
+
     frag.appendChild(tr);
   });
   tbodyEl.appendChild(frag);
+  updateSelectionUI();
 }
 
 searchEl.addEventListener('input', (e) => {
   const q = e.target.value;
   renderRows(sortRows(filterRows(q)), q);
 });
-
