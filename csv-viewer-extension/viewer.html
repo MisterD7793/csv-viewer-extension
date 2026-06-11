@@ -180,6 +180,51 @@
 
     mark { background: #854d0e; color: #fde68a; border-radius: 2px; padding: 0 2px; }
 
+    .copy-col-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 5px;
+      padding: 2px 3px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      opacity: 0;
+      transition: opacity 0.1s, color 0.15s;
+      vertical-align: middle;
+      border-radius: 3px;
+    }
+    th:hover .copy-col-btn { opacity: 1; }
+    .copy-col-btn:hover { color: var(--text); }
+    .copy-col-btn.copied { color: var(--accent) !important; opacity: 1; }
+
+    .copy-row-th { width: 32px; padding: 0; }
+
+    .copy-row-cell {
+      width: 32px;
+      padding: 0 6px;
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    .copy-row-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      opacity: 0;
+      transition: opacity 0.1s, color 0.15s;
+      border-radius: 3px;
+    }
+    tbody tr:hover .copy-row-btn { opacity: 1; }
+    .copy-row-btn:hover { color: var(--text); }
+    .copy-row-btn.copied { color: var(--accent) !important; opacity: 1; }
+
     #no-results {
       display: none;
       padding: 48px;

@@ -79,11 +79,20 @@ if (!id) {
   });
 }
 
+const COPY_ICON = `<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+
+function copyAndFlash(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.classList.add('copied');
+    setTimeout(() => btn.classList.remove('copied'), 900);
+  });
+}
+
 function renderHeaders() {
   const tr = document.createElement('tr');
   headers.forEach((h, i) => {
     const th = document.createElement('th');
-    th.innerHTML = `${escHtml(h)}<span class="sort-arrow"></span>`;
+    th.innerHTML = `${escHtml(h)}<span class="sort-arrow"></span><button class="copy-col-btn" title="Copy column">${COPY_ICON}</button>`;
     th.addEventListener('click', () => {
       if (sortCol === i) sortAsc = !sortAsc;
       else { sortCol = i; sortAsc = true; }
@@ -91,8 +100,18 @@ function renderHeaders() {
       th.classList.add(sortAsc ? 'sorted-asc' : 'sorted-desc');
       renderRows(sortRows(filterRows(searchEl.value)), searchEl.value);
     });
+    const copyBtn = th.querySelector('.copy-col-btn');
+    copyBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const visibleRows = sortRows(filterRows(searchEl.value));
+      const text = visibleRows.map(r => r[i] ?? '').join('\n');
+      copyAndFlash(text, copyBtn);
+    });
     tr.appendChild(th);
   });
+  const spacerTh = document.createElement('th');
+  spacerTh.className = 'copy-row-th';
+  tr.appendChild(spacerTh);
   theadEl.appendChild(tr);
 }
 
@@ -136,6 +155,14 @@ function renderRows(rows, query = '') {
       td.innerHTML = val ? highlight(val, query) : '—';
       tr.appendChild(td);
     });
+    const copyTd = document.createElement('td');
+    copyTd.className = 'copy-row-cell';
+    copyTd.innerHTML = `<button class="copy-row-btn" title="Copy row">${COPY_ICON}</button>`;
+    copyTd.querySelector('.copy-row-btn').addEventListener('click', () => {
+      const text = headers.map((_, i) => row[i] ?? '').join('\t');
+      copyAndFlash(text, copyTd.querySelector('.copy-row-btn'));
+    });
+    tr.appendChild(copyTd);
     frag.appendChild(tr);
   });
   tbodyEl.appendChild(frag);
