@@ -55,4 +55,36 @@ function remove(i) {
 addBtn.addEventListener('click', add);
 newDomainInput.addEventListener('keydown', e => { if (e.key === 'Enter') add(); });
 
+document.getElementById('export-btn').addEventListener('click', () => {
+  const json = JSON.stringify({ allowedDomains: domains }, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'csv-viewer-domains.json'; a.click();
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById('import-btn').addEventListener('click', () => {
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = '.json';
+  input.addEventListener('change', () => {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (!Array.isArray(data.allowedDomains)) return;
+        let added = 0;
+        data.allowedDomains.forEach(d => {
+          if (typeof d === 'string' && d && !domains.includes(d)) { domains.push(d); added++; }
+        });
+        if (added > 0) { render(); save(); }
+      } catch {}
+    };
+    reader.readAsText(file);
+  });
+  input.click();
+});
+
 load();

@@ -159,6 +159,33 @@
       margin-top: 4px;
       line-height: 1.5;
     }
+
+    .section-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+
+    .backup-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    button.secondary-btn {
+      background: var(--surface);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    button.secondary-btn:hover { border-color: var(--accent); color: var(--text); }
   </style>
 </head>
 <body>
@@ -177,6 +204,14 @@
   <label>Allowed Domains</label>
   <ul id="domain-list"></ul>
   <p class="empty-state" id="empty-state" style="display:none">No domains added yet.</p>
+
+  <hr class="section-divider">
+  <label>Backup & Restore</label>
+  <div class="backup-row">
+    <button class="secondary-btn" id="export-btn">Export domains</button>
+    <button class="secondary-btn" id="import-btn">Import domains</button>
+  </div>
+  <p class="hint">Export saves your domain list as a file you can re-import after reinstalling the extension.</p>
 
   <div class="toast" id="toast">Saved</div>
 

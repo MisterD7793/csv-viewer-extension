@@ -40,15 +40,16 @@ let rawCsvText = '', csvFilename = 'roster.csv';
 let selectedRows = new Set(), selectedCols = new Set();
 let selectAllBtn = null, colCheckBtns = [];
 
-// Feature banner
-const featureBanner = document.getElementById('feature-banner');
-document.getElementById('feature-banner-close').addEventListener('click', () => {
-  featureBanner.style.display = 'none';
-  localStorage.setItem('csv-viewer-v24-banner', '1');
-});
-if (!localStorage.getItem('csv-viewer-v24-banner')) {
-  featureBanner.style.display = 'flex';
+// Feature modal
+const modalOverlay = document.getElementById('modal-overlay');
+const modalDontShow = document.getElementById('modal-dont-show');
+function closeModal() {
+  modalOverlay.style.display = 'none';
+  if (modalDontShow.checked) localStorage.setItem('csv-viewer-v24-banner', '1');
 }
+document.getElementById('modal-close').addEventListener('click', closeModal);
+modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
+if (!localStorage.getItem('csv-viewer-v24-banner')) modalOverlay.style.display = 'flex';
 
 downloadBtn.addEventListener('click', () => {
   if (!rawCsvText) return;

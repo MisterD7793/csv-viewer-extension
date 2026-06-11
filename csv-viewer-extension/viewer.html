@@ -275,29 +275,76 @@
 
     th.col-selected { background: #172017; color: var(--accent); }
 
-    #feature-banner {
+    #modal-overlay {
       display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      z-index: 200;
       align-items: center;
+      justify-content: center;
+    }
+
+    #modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 28px 32px;
+      max-width: 460px;
+      width: calc(100% - 48px);
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+    }
+
+    #modal-title {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    #modal-body {
+      font-size: 13px;
+      line-height: 1.65;
+      color: var(--text);
+      margin-bottom: 24px;
+    }
+    #modal-body strong { color: var(--accent); font-weight: 600; }
+
+    #modal-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       gap: 12px;
-      padding: 10px 24px;
-      background: #111827;
-      border-bottom: 1px solid var(--accent-dim);
+    }
+
+    #modal-suppress {
+      display: flex;
+      align-items: center;
+      gap: 7px;
       font-size: 12px;
       color: var(--text-muted);
-    }
-    #feature-banner strong { color: var(--accent); font-weight: 600; }
-    #feature-banner-content { flex: 1; line-height: 1.5; }
-    #feature-banner-close {
-      background: none;
-      border: none;
       cursor: pointer;
-      color: var(--text-muted);
-      font-size: 18px;
-      line-height: 1;
-      padding: 0 2px;
-      flex-shrink: 0;
+      user-select: none;
     }
-    #feature-banner-close:hover { color: var(--text); }
+    #modal-suppress input { accent-color: var(--accent); cursor: pointer; margin: 0; }
+
+    #modal-close {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 7px 20px;
+      background: var(--accent-dim);
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    #modal-close:hover { background: #14532d; }
 
     #copy-selected-btn {
       display: flex;
@@ -355,12 +402,20 @@
   </button>
 </div>
 
-<div id="feature-banner">
-  <div id="feature-banner-content">
-    <strong>New:</strong> Hover any column header or row to reveal a copy icon and a selection checkbox.
-    Check multiple rows and/or columns, then click <strong>Copy Selected</strong> in the toolbar to copy the intersection — perfect for pasting into Excel or Sheets.
+<div id="modal-overlay">
+  <div id="modal">
+    <div id="modal-title">◈ What's New</div>
+    <div id="modal-body">
+      Hover any <strong>column header</strong> or <strong>row</strong> to reveal a copy icon and a selection checkbox alongside the row number.<br><br>
+      Check multiple rows and/or columns, then click <strong>Copy Selected</strong> in the toolbar to copy the intersection — great for pasting a specific subset into Excel or Sheets.
+    </div>
+    <div id="modal-footer">
+      <label id="modal-suppress">
+        <input type="checkbox" id="modal-dont-show"> Don't show this again
+      </label>
+      <button id="modal-close">Got it</button>
+    </div>
   </div>
-  <button id="feature-banner-close" title="Dismiss">×</button>
 </div>
 
 <div id="status"><span class="spinner"></span> Loading…</div>

@@ -1,6 +1,27 @@
 # CSV Roster Viewer — Changelog
 
-## v2.2 (current)
+## v2.6 (current)
+- Added Export/Import to the Settings page — saves your domain list as a JSON file you can re-import after reinstalling the extension
+- Replaced the feature announcement banner with a centered modal popover
+- "Don't show this again" checkbox in modal footer — dismissing without it checked allows the modal to reappear next session
+
+## v2.5
+- Replaced native browser checkboxes with hover-reveal SVG line-art buttons matching the copy icon style
+- Column select buttons moved to the end of each header (after the copy icon)
+- Added a dismissable feature announcement banner
+
+## v2.4
+- Added row numbers and selection checkboxes to a new leftmost # column
+- Added column selection checkboxes to each header
+- Added "Copy Selected" toolbar button — copies the intersection of selected rows × columns as tab-separated text
+
+## v2.3
+- Added copy-to-clipboard buttons to the viewer
+- Column header: hover to reveal a copy icon that copies all visible column values (newline-separated)
+- Row: hover to reveal a copy icon that copies all row values (tab-separated, pastes cleanly into Excel or Sheets)
+- Green flash confirmation on copy
+
+## v2.2
 - Published to GitHub for distribution
 - Added complete user documentation: installation, usage, Developer Mode explainer, uninstallation
 
