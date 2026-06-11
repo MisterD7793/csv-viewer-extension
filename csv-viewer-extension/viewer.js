@@ -38,7 +38,17 @@ const noResults = document.getElementById('no-results');
 let allRows = [], headers = [], sortCol = -1, sortAsc = true;
 let rawCsvText = '', csvFilename = 'roster.csv';
 let selectedRows = new Set(), selectedCols = new Set();
-let selectAllCheckbox = null;
+let selectAllBtn = null, colCheckBtns = [];
+
+// Feature banner
+const featureBanner = document.getElementById('feature-banner');
+document.getElementById('feature-banner-close').addEventListener('click', () => {
+  featureBanner.style.display = 'none';
+  localStorage.setItem('csv-viewer-v24-banner', '1');
+});
+if (!localStorage.getItem('csv-viewer-v24-banner')) {
+  featureBanner.style.display = 'flex';
+}
 
 downloadBtn.addEventListener('click', () => {
   if (!rawCsvText) return;
@@ -94,7 +104,10 @@ if (!id) {
   });
 }
 
-const COPY_ICON = `<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+const COPY_ICON  = `<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+const CHECK_EMPTY = `<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>`;
+const CHECK_ON    = `<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><polyline points="7,13 11,17 17,7"/></svg>`;
+const CHECK_MIXED = `<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="8" y1="12" x2="16" y2="12"/></svg>`;
 
 function copyAndFlash(text, btn) {
   navigator.clipboard.writeText(text).then(() => {
@@ -103,12 +116,16 @@ function copyAndFlash(text, btn) {
   });
 }
 
+function setCheckState(btn, checked, indeterminate = false) {
+  btn.innerHTML = indeterminate ? CHECK_MIXED : (checked ? CHECK_ON : CHECK_EMPTY);
+  btn.classList.toggle('is-checked', checked || indeterminate);
+}
+
 function updateSelectionUI() {
-  if (selectAllCheckbox) {
+  if (selectAllBtn) {
     const visibleRows = sortRows(filterRows(searchEl.value));
     const n = visibleRows.filter(r => selectedRows.has(r)).length;
-    selectAllCheckbox.indeterminate = n > 0 && n < visibleRows.length;
-    selectAllCheckbox.checked = n > 0 && n === visibleRows.length;
+    setCheckState(selectAllBtn, n > 0 && n === visibleRows.length, n > 0 && n < visibleRows.length);
   }
   const hasRows = selectedRows.size > 0, hasCols = selectedCols.size > 0;
   copySelectedBtn.style.display = (hasRows || hasCols) ? 'flex' : 'none';
@@ -121,42 +138,34 @@ function updateSelectionUI() {
 }
 
 function renderHeaders() {
+  colCheckBtns = [];
   const tr = document.createElement('tr');
 
+  // Row-number column: select-all check button
   const rowNumTh = document.createElement('th');
   rowNumTh.className = 'row-num-th';
-  selectAllCheckbox = document.createElement('input');
-  selectAllCheckbox.type = 'checkbox';
-  selectAllCheckbox.className = 'select-all-rows';
-  selectAllCheckbox.title = 'Select / deselect all visible rows';
-  selectAllCheckbox.addEventListener('change', () => {
+  selectAllBtn = document.createElement('button');
+  selectAllBtn.className = 'check-btn';
+  selectAllBtn.title = 'Select / deselect all visible rows';
+  setCheckState(selectAllBtn, false);
+  selectAllBtn.addEventListener('click', () => {
     const visibleRows = sortRows(filterRows(searchEl.value));
-    visibleRows.forEach(r => selectAllCheckbox.checked ? selectedRows.add(r) : selectedRows.delete(r));
+    const allSelected = visibleRows.every(r => selectedRows.has(r));
+    visibleRows.forEach(r => allSelected ? selectedRows.delete(r) : selectedRows.add(r));
     renderRows(sortRows(filterRows(searchEl.value)), searchEl.value);
   });
-  rowNumTh.appendChild(selectAllCheckbox);
+  rowNumTh.appendChild(selectAllBtn);
   tr.appendChild(rowNumTh);
 
   headers.forEach((h, i) => {
     const th = document.createElement('th');
 
-    const colCb = document.createElement('input');
-    colCb.type = 'checkbox';
-    colCb.className = 'col-select';
-    colCb.title = 'Select column';
-    colCb.checked = selectedCols.has(i);
-    colCb.addEventListener('click', e => e.stopPropagation());
-    colCb.addEventListener('change', () => {
-      if (colCb.checked) selectedCols.add(i); else selectedCols.delete(i);
-      th.classList.toggle('col-selected', colCb.checked);
-      updateSelectionUI();
-    });
-    th.appendChild(colCb);
-
+    // Label + sort arrow
     const label = document.createElement('span');
     label.innerHTML = `${escHtml(h)}<span class="sort-arrow"></span>`;
     th.appendChild(label);
 
+    // Copy-column button
     const copyBtn = document.createElement('button');
     copyBtn.className = 'copy-col-btn';
     copyBtn.title = 'Copy column';
@@ -168,6 +177,21 @@ function renderHeaders() {
       copyAndFlash(text, copyBtn);
     });
     th.appendChild(copyBtn);
+
+    // Column select check button (after copy icon)
+    const colBtn = document.createElement('button');
+    colBtn.className = 'check-btn';
+    colBtn.title = 'Select column';
+    setCheckState(colBtn, selectedCols.has(i));
+    colCheckBtns[i] = colBtn;
+    colBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (selectedCols.has(i)) selectedCols.delete(i); else selectedCols.add(i);
+      setCheckState(colBtn, selectedCols.has(i));
+      th.classList.toggle('col-selected', selectedCols.has(i));
+      updateSelectionUI();
+    });
+    th.appendChild(colBtn);
 
     th.addEventListener('click', () => {
       if (sortCol === i) sortAsc = !sortAsc;
@@ -218,18 +242,26 @@ function renderRows(rows, query = '') {
     const tr = document.createElement('tr');
     if (selectedRows.has(row)) tr.classList.add('row-selected');
 
+    // Row-number cell: check button + number + copy button
     const rowNumTd = document.createElement('td');
     rowNumTd.className = 'row-num-cell';
     const inner = document.createElement('div');
     inner.className = 'row-num-inner';
 
-    const rowCb = document.createElement('input');
-    rowCb.type = 'checkbox';
-    rowCb.className = 'row-select';
-    rowCb.checked = selectedRows.has(row);
-    rowCb.addEventListener('change', () => {
-      if (rowCb.checked) { selectedRows.add(row); tr.classList.add('row-selected'); }
-      else { selectedRows.delete(row); tr.classList.remove('row-selected'); }
+    const rowBtn = document.createElement('button');
+    rowBtn.className = 'check-btn';
+    rowBtn.title = 'Select row';
+    setCheckState(rowBtn, selectedRows.has(row));
+    rowBtn.addEventListener('click', () => {
+      if (selectedRows.has(row)) {
+        selectedRows.delete(row);
+        tr.classList.remove('row-selected');
+        setCheckState(rowBtn, false);
+      } else {
+        selectedRows.add(row);
+        tr.classList.add('row-selected');
+        setCheckState(rowBtn, true);
+      }
       updateSelectionUI();
     });
 
@@ -246,7 +278,7 @@ function renderRows(rows, query = '') {
       copyAndFlash(text, copyBtn);
     });
 
-    inner.appendChild(rowCb);
+    inner.appendChild(rowBtn);
     inner.appendChild(numSpan);
     inner.appendChild(copyBtn);
     rowNumTd.appendChild(inner);
